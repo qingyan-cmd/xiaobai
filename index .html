@@ -1,0 +1,414 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>给你的惊喜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #e6f3ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: '微软雅黑', 'PingFang SC', sans-serif;
+            transition: background 0.5s;
+        }
+
+        .entrance {
+            text-align: center;
+            padding: 40px 30px;
+            max-width: 480px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .entrance h1 {
+            font-size: 24px;
+            color: #1a1a2e;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            min-height: 80px;
+            transition: opacity 0.3s;
+        }
+
+        .entrance .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .entrance .btn-group button {
+            padding: 12px 36px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+            letter-spacing: 1px;
+        }
+
+        .entrance .btn-group .btn-white {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .entrance .btn-group .btn-white:hover {
+            background: #e0e0e0;
+        }
+
+        .entrance .btn-group .btn-red {
+            background: #cc3366;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(204, 51, 102, 0.3);
+        }
+
+        .entrance .btn-group .btn-red:hover {
+            background: #b22a55;
+            transform: scale(1.02);
+        }
+
+        .entrance .btn-single {
+            display: inline-block;
+            padding: 14px 48px;
+            background: #cc3366;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(204, 51, 102, 0.3);
+            letter-spacing: 2px;
+            margin-top: 20px;
+        }
+
+        .entrance .btn-single:hover {
+            background: #b22a55;
+            transform: translateY(-2px);
+        }
+
+        .entrance .sub-msg {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
+            min-height: 20px;
+        }
+
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .confirm-overlay.show {
+            display: flex;
+        }
+
+        .confirm-box {
+            background: #fff;
+            border-radius: 28px;
+            padding: 36px 40px 30px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            animation: popUp 0.3s ease;
+        }
+
+        .confirm-box .msg {
+            font-size: 20px;
+            color: #1a1a2e;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .confirm-box .sub-msg {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .confirm-box .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .confirm-box .btn-group button {
+            padding: 10px 32px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+            letter-spacing: 1px;
+        }
+
+        .confirm-box .btn-group .btn-gray {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .confirm-box .btn-group .btn-gray:hover {
+            background: #e0e0e0;
+        }
+
+        .confirm-box .btn-group .btn-red {
+            background: #cc3366;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(204, 51, 102, 0.3);
+        }
+
+        .confirm-box .btn-group .btn-red:hover {
+            background: #b22a55;
+            transform: scale(1.02);
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes popUp {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .destroyed {
+            background: #1a1a2e !important;
+        }
+
+        .destroyed .entrance {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s;
+        }
+
+        .destroyed .destroy-msg {
+            display: block !important;
+        }
+
+        .destroy-msg {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-align: center;
+            z-index: 99999;
+            animation: fadeIn 1s ease;
+        }
+
+        .destroy-msg small {
+            display: block;
+            font-size: 14px;
+            color: #888;
+            margin-top: 12px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="destroy-msg" id="destroyMsg">
+        💔 你取消了这次惊喜
+        <small>此过程已无法撤回</small>
+    </div>
+
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="msg" id="confirmMsg">你真的要这样嘛？</div>
+            <div class="sub-msg" id="confirmSub">此过程无法撤回</div>
+            <div class="btn-group">
+                <button class="btn-gray" id="confirmCancel">取消</button>
+                <button class="btn-red" id="confirmOk">同意</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="entrance" id="entrance">
+        <h1 id="mainText">💌 <span id="nameDisplay">XXX</span>，这是我亲手给你搞的惊喜哦</h1>
+        <div id="singleBtnContainer">
+            <button class="btn-single" id="startBtn">点开看看</button>
+        </div>
+        <div id="doubleBtnContainer" style="display:none;">
+            <div class="btn-group">
+                <button class="btn-white" id="leftBtn">No</button>
+                <button class="btn-red" id="rightBtn">Yes</button>
+            </div>
+        </div>
+        <div class="sub-msg" id="subMsg"></div>
+    </div>
+
+    <script>
+        document.getElementById("nameDisplay").textContent = "XXX";
+
+        var rounds = [{
+            text: "你确定你能承受得住嘛？",
+            left: "不行",
+            right: "我可以"
+        }, {
+            text: "你确定要看下去？",
+            left: "不要了吧",
+            right: "要"
+        }, {
+            text: "不会后悔吧？",
+            left: "后悔",
+            right: "不后悔"
+        }, {
+            text: "里面可能有你不想看到的东西哦",
+            left: "那我不看了",
+            right: "我偏要看"
+        }, {
+            text: "你现在还有机会离开",
+            left: "离开",
+            right: "不离开"
+        }, {
+            text: "再给你一次机会，确定吗？",
+            left: "确定",
+            right: "不了"
+        }, {
+            text: "最后一次机会了，真的要看嘛？",
+            left: "不要了",
+            right: "要"
+        }];
+
+        var currentRound = 0;
+        var isDestroyed = false;
+        var isStarted = false;
+
+        var mainText = document.getElementById("mainText");
+        var singleBtnContainer = document.getElementById("singleBtnContainer");
+        var doubleBtnContainer = document.getElementById("doubleBtnContainer");
+        var startBtn = document.getElementById("startBtn");
+        var leftBtn = document.getElementById("leftBtn");
+        var rightBtn = document.getElementById("rightBtn");
+        var subMsg = document.getElementById("subMsg");
+        var body = document.body;
+
+        var confirmOverlay = document.getElementById("confirmOverlay");
+        var confirmCancel = document.getElementById("confirmCancel");
+        var confirmOk = document.getElementById("confirmOk");
+        var pendingAction = null;
+
+        function showConfirmDialog(callback) {
+            pendingAction = callback;
+            confirmOverlay.classList.add("show");
+        }
+
+        function hideConfirmDialog() {
+            confirmOverlay.classList.remove("show");
+            pendingAction = null;
+        }
+
+        function destroyProgram() {
+            isDestroyed = true;
+            hideConfirmDialog();
+            body.classList.add("destroyed");
+            document.getElementById("destroyMsg").style.display = "block";
+        }
+
+        function goToNextRound() {
+            var nextIndex = currentRound + 1;
+            if (nextIndex >= rounds.length) {
+                window.location.href = "love1 .html";
+                return;
+            }
+            var round = rounds[nextIndex];
+            mainText.textContent = round.text;
+            leftBtn.textContent = round.left;
+            rightBtn.textContent = round.right;
+            subMsg.textContent = "";
+            currentRound = nextIndex;
+        }
+
+        startBtn.addEventListener("click", function() {
+            if (isDestroyed || isStarted) return;
+            isStarted = true;
+            singleBtnContainer.style.display = "none";
+            doubleBtnContainer.style.display = "block";
+            mainText.textContent = "你真的准备好接受这个礼物了吗？";
+            leftBtn.textContent = "No";
+            rightBtn.textContent = "Yes";
+            subMsg.textContent = "";
+        });
+
+        confirmCancel.addEventListener("click", function() {
+            hideConfirmDialog();
+        });
+
+        confirmOk.addEventListener("click", function() {
+            if (pendingAction) {
+                pendingAction();
+            }
+            hideConfirmDialog();
+        });
+
+        function isConfirmWord(text) {
+            var words = ["Yes", "我可以", "我偏要看", "不离开", "确定", "要", "不后悔"];
+            return words.includes(text.trim());
+        }
+
+        function handleButtonClick(btnText) {
+            if (isDestroyed) return;
+            var text = btnText.trim();
+            if (isConfirmWord(text)) {
+                goToNextRound();
+                return;
+            }
+            showConfirmDialog(function() {
+                destroyProgram();
+            });
+        }
+
+        leftBtn.addEventListener("click", function() {
+            handleButtonClick(leftBtn.textContent);
+        });
+
+        rightBtn.addEventListener("click", function() {
+            handleButtonClick(rightBtn.textContent);
+        });
+    </script>
+
+</body>
+</html>
