@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>给你的话</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #e6f3ff;
+            font-family: '微软雅黑', 'PingFang SC', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ===== 加载层（可点击） ===== */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 999999;
+            transition: opacity 0.6s ease;
+            color: #fff;
+            font-family: '微软雅黑', sans-serif;
+            cursor: pointer;
+        }
+
+        #loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #loader .icon {
+            font-size: 64px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        #loader h1 {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: #f5c842;
+            margin-top: 16px;
+        }
+
+        #loader .sub {
+            color: #aaa;
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        #loader .hint {
+            color: #666;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        #loader .progress-bar {
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 24px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #loader .progress-bar.show {
+            opacity: 1;
+        }
+
+        #loader .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f5c842, #ff6b8a);
+            border-radius: 10px;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        /* ===== 固定标题 ===== */
+        .fixed-header {
+            position: fixed;
+            top: 30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+            pointer-events: none;
+            color: #f5c842;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(245, 200, 66, 0.3);
+        }
+
+        .fixed-header small {
+            display: block;
+            font-size: 16px;
+            color: #aaa;
+            font-weight: normal;
+            margin-top: 6px;
+        }
+
+        /* ===== 告白弹窗 ===== */
+        .final-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(42, 42, 58, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid #f5c842;
+            border-radius: 24px;
+            padding: 50px 60px;
+            max-width: 640px;
+            width: 90%;
+            z-index: 999999;
+            box-shadow: 0 0 60px rgba(245, 200, 66, 0.2);
+            text-align: center;
+            color: #e0e0e0;
+            font-family: '微软雅黑', 'PingFang SC', sans-serif;
+            animation: fadeInUp 1s ease-out;
+            pointer-events: auto;
+        }
+
+        .final-message h2 {
+            font-size: 32px;
+            color: #f5c842;
+            margin: 0 0 16px 0;
+            letter-spacing: 2px;
+        }
+
+        .final-message .heart-line {
+            font-size: 28px;
+            color: #ff6b8a;
+            margin: 8px 0 16px 0;
+        }
+
+        .final-message p {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #d0d0d0;
+            margin: 12px 0;
+        }
+
+        .final-message .highlight {
+            color: #f5c842;
+            font-weight: bold;
+        }
+
+        .final-message .small-note {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 24px;
+            border-top: 1px solid #aaa;
+            padding-top: 20px;
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translate(-50%, -40%); }
+            100% { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        /* ===== 弹窗样式 ===== */
+        .popup-item {
+            position: fixed;
+            background: #ffe6e6;
+            border: 2px solid #cc3366;
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(204, 51, 102, 0.3);
+            font-family: '微软雅黑', sans-serif;
+            font-size: 18px;
+            color: #cc3366;
+            z-index: 999;
+            cursor: default;
+            user-select: none;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 加载层（点击后开始播放音乐+倒计时） ===== -->
+    <div id="loader">
+        <div class="icon">💌</div>
+        <h1>音乐加载中</h1>
+        <div class="sub">惊喜马上就来...</div>
+        <div class="hint" id="hint">👆 点击任意处开始</div>
+        <div class="progress-bar" id="progressBar">
+            <div class="fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- ===== 固定标题 ===== -->
+    <div class="fixed-header">
+        💕 我喜欢你
+        <small>你是信的开头<br>诗的内容<br>童话的结尾<br>你是理所当然的奇迹<br>你是月色真美<br>你是圣诞老人送给我<br>好孩子的礼物<br>你是三千美丽世界里<br>我的一瓢水</small>
+    </div>
+
+    <!-- ===== 音频播放器（隐藏） ===== -->
+    <audio id="bgm" loop volume="0.3">
+        <source src="30231235149-1-192.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        var audio = document.getElementById("bgm");
+        var loader = document.getElementById("loader");
+        var hint = document.getElementById("hint");
+        var progressBar = document.getElementById("progressBar");
+        var progressFill = document.getElementById("progressFill");
+
+        var isStarted = false;
+
+        // =============================================
+        // 点击加载层 → 播放音乐 + 开始倒计时
+        // =============================================
+        loader.addEventListener("click", function() {
+            if (isStarted) return;
+            isStarted = true;
+
+            // 播放音乐
+            audio.play().catch(function(e) {
+                console.log("播放失败:", e);
+            });
+
+            // 更新提示
+            hint.textContent = "🎵 音乐已开启，正在加载...";
+            hint.style.animation = "none";
+
+            // 显示进度条并开始动画
+            progressBar.classList.add("show");
+            progressFill.style.animation = "loading 5s linear forwards";
+
+            // 5秒后隐藏加载层
+            setTimeout(function() {
+                loader.classList.add("hide");
+                // 弹窗逻辑启动（在加载层消失后）
+                startPopups();
+            }, 5000);
+        });
+
+        // =============================================
+        // 弹窗逻辑（封装成函数，延迟启动）
+        // =============================================
+        var msgs = [
+            "你是我见过最好看的人。",
+            "今天也想和你一起散步。",
+            "你的声音像夏天的风。",
+            "我喜欢你。",
+            "想每天醒来都看到你。",
+            "你已经占据了我所有的梦",
+            "有你的时候，时间总是太快",
+            "想和你一起打很久的游戏。",
+            "你是我的第一顺位。",
+            "我猜你也喜欢我吧？",
+            "我爱你。",
+            "爱你入骨。",
+            "你笑着真甜。",
+            "你值得被偏爱。",
+            "我想牵起你的手。",
+            "我会陪你熬过黑夜。",
+            "我最爱最喜欢的是你。",
+            "你撒娇的样子让人欢喜。",
+            "别怕我会一直陪着你。",
+            "下辈子我还要爱你。",
+            "I love you。",
+            "你是我写过最温柔的诗。",
+            "你一笑，天就亮了。",
+            "想和你一起看日落。",
+            "你的名字是我听过最好听的",
+            "每分每秒都在想你。"
+        ];
+
+        var intervalTime = 705;
+        var deleteEvery = 25;
+        var targetCount = 520;
+        var addCount = 0;
+        var popupList = [];
+        var isFinished = false;
+
+        function createPopup(text) {
+            if (isFinished) return;
+
+            var div = document.createElement("div");
+            div.className = "popup-item";
+            div.textContent = "❤️ " + text + " ❤️";
+
+            var maxW = window.innerWidth - 300;
+            var maxH = window.innerHeight - 100;
+            div.style.left = Math.random() * maxW + "px";
+            div.style.top = Math.random() * maxH + "px";
+
+            document.body.appendChild(div);
+            popupList.push(text);
+
+            addCount++;
+            if (addCount >= deleteEvery) {
+                addCount = 0;
+                if (popupList.length > 0) {
+                    var oldestText = popupList.shift();
+                    var allPopups = document.querySelectorAll(".popup-item");
+                    for (var i = 0; i < allPopups.length; i++) {
+                        if (allPopups[i].textContent.includes(oldestText)) {
+                            allPopups[i].remove();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            var currentTotal = document.querySelectorAll(".popup-item").length;
+            if (currentTotal >= targetCount && !isFinished) {
+                isFinished = true;
+                showFinalMessage();
+            }
+        }
+
+        function showFinalMessage() {
+            var overlay = document.createElement("div");
+            overlay.className = "final-message";
+            overlay.innerHTML = `
+                <h2>💌 我喜欢你</h2>
+                <div class="heart-line">♥ ♥ ♥</div>
+                <p>不是一时兴起，是<strong class="highlight">深思熟虑</strong>。</p>
+                <p>我说完了，你不需要现在回答，</p>
+                <p>但我想让你<span style="color:#ff6b8a;">清清楚楚</span>知道我的心意——</p>
+                <p style="font-size:26px; color:#f5c842; font-weight:bold; margin:20px 0 10px 0;">
+                    我想和你把“我”变成“我们”
+                </p>
+                <div class="small-note">💕 520 个弹窗 · 每一句都是真心</div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+       function startPopups() {
+    setTimeout(function() {
+        setInterval(function() {
+            if (isFinished) return;
+
+            var msg1 = msgs[Math.floor(Math.random() * msgs.length)];
+            createPopup(msg1);
+
+            setTimeout(function() {
+                if (isFinished) return;
+                var msg2 = msgs[Math.floor(Math.random() * msgs.length)];
+                createPopup(msg2);
+            }, 352.5);
+        }, intervalTime);
+    }, 2505);
+}
+    </script>
+
+</body>
+</html>
